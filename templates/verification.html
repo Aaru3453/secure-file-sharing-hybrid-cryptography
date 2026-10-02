@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Cryptographic Verification & Audit | SecureShare Hybrid{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+    <div>
+        <h1 class="page-title">Cryptographic Verification & Audit</h1>
+        <p class="page-subtitle">Multi-tier validation of Hybrid Ciphertext Package #{{ file['id'] }}</p>
+    </div>
+    <a href="{{ url_for('received_files_page') }}" class="btn btn-secondary">
+        ← Back to Received Files
+    </a>
+</div>
+
+<!-- Verification Status Header Banner -->
+{% set all_passed = audit['rsa_oaep_decapsulation'] and audit['aes_gcm_decryption'] and audit['digital_signature_valid'] and audit['sha256_integrity_match'] %}
+
+<div class="verification-header-banner {{ 'passed' if all_passed else 'failed' }}">
+    <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="font-size: 2.5rem;">
+            {{ '🛡️' if all_passed else '⚠️' }}
+        </div>
+        <div>
+            <h2 style="font-size: 1.4rem; font-weight: 700;">
+                {{ 'Cryptographic Integrity & Authenticity Verified' if all_passed else 'Cryptographic Verification Incomplete or Failed' }}
+            </h2>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                File: <strong>{{ file['original_filename'] }}</strong> ({{ (file['file_size'] / 1024) | round(2) }} KB) | Transferred from: <strong>{{ sender['username'] }}</strong>
+            </p>
+        </div>
+    </div>
+
+    <div>
+        {% if all_passed %}
+            <a href="{{ url_for('download_file', file_id=file['id']) }}" class="btn btn-emerald" style="padding: 12px 24px; font-size: 1rem;">
+                ⬇️ Download Verified File
+            </a>
+        {% else %}
+            <span class="badge badge-danger" style="padding: 8px 16px; font-size: 0.9rem;">
+                Download Blocked Due to Tamper Risk
+            </span>
+        {% endif %}
+    </div>
+</div>
+
+{% if audit['error_message'] %}
+<div class="flash-alert danger">
+    <strong>Verification Error:</strong> {{ audit['error_message'] }}
+</div>
+{% endif %}
+
+<!-- Detailed Cryptographic Audit Checklist -->
+<div class="glass-card" style="margin-bottom: 32px;">
+    <h3 class="card-title">
+        <span>🔬</span> Security Layer Audit Report (CNS Viva Proofs)
+    </h3>
+
+    <div class="audit-checklist">
+        <!-- Step 1: RSA OAEP -->
+        <div class="audit-item">
+            <div class="audit-status-icon {{ 'pass' if audit['rsa_oaep_decapsulation'] else 'fail' }}">
+                {{ '✓' if audit['rsa_oaep_decapsulation'] else '✕' }}
+            </div>
+            <div class="audit-content" style="flex: 1;">
+                <h4>1. RSA-2048 OAEP Symmetric Key Decapsulation</h4>
+                <p>
+                    Recipient's private key successfully decrypted the 256-bit symmetric AES key using Optimal Asymmetric Encryption Padding (OAEP) with SHA-256 and MGF1.
+                </p>
+                <div style="margin-top: 8px; font-size: 0.78rem; color: var(--text-muted);">
+                    Ciphertext Size: 256 bytes (2048 bits) | Recovered Key: 32 bytes (256 bits)
+                </div>
+            </div>
+            <span class="badge {{ 'badge-success' if audit['rsa_oaep_decapsulation'] else 'badge-danger' }}">
+                {{ 'DECAPSULATED' if audit['rsa_oaep_decapsulation'] else 'FAILED' }}
+            </span>
+        </div>
+
+        <!-- Step 2: AES-256-GCM -->
+        <div class="audit-item">
+            <div class="audit-status-icon {{ 'pass' if audit['aes_gcm_tag_valid'] else 'fail' }}">
+                {{ '✓' if audit['aes_gcm_tag_valid'] else '✕' }}
+            </div>
+            <div class="audit-content" style="flex: 1;">
+                <h4>2. AES-256-GCM Bulk Decryption & AEAD Tag Verification</h4>
+                <p>
+                    Galois/Counter Mode (GCM) verified the 128-bit GHASH authentication tag using the 96-bit unique nonce. Zero bit-tampering detected in stored ciphertext payload.
+                </p>
+                <div style="margin-top: 8px; font-size: 0.78rem; color: var(--text-muted);">
+                    Auth Tag (128-bit GHASH): <span class="mono-text">{{ audit['auth_tag_hex'] }}</span>
+                </div>
+            </div>
+            <span class="badge {{ 'badge-success' if audit['aes_gcm_tag_valid'] else 'badge-danger' }}">
+                {{ 'TAG VERIFIED' if audit['aes_gcm_tag_valid'] else 'CORRUPTED' }}
+            </span>
+        </div>
+
+        <!-- Step 3: RSA-PSS Digital Signature -->
+        <div class="audit-item">
+            <div class="audit-status-icon {{ 'pass' if audit['digital_signature_valid'] else 'fail' }}">
+                {{ '✓' if audit['digital_signature_valid'] else '✕' }}
+            </div>
+            <div class="audit-content" style="flex: 1;">
+                <h4>3. RSA-PSS Digital Signature (Authenticity & Non-Repudiation)</h4>
+                <p>
+                    Verified sender's cryptographic signature using <strong>{{ sender['username'] }}'s</strong> RSA-2048 public key. Confirms this package originated strictly from {{ sender['username'] }} and cannot be repudiated.
+                </p>
+                <div style="margin-top: 8px; font-size: 0.78rem; color: var(--text-muted);">
+                    Algorithm: RSA-PSS | Hash: SHA-256 | Signature Length: 256 bytes
+                </div>
+            </div>
+            <span class="badge {{ 'badge-success' if audit['digital_signature_valid'] else 'badge-danger' }}">
+                {{ 'SIGNATURE VALID' if audit['digital_signature_valid'] else 'INVALID SIGNATURE' }}
+            </span>
+        </div>
+
+        <!-- Step 4: SHA-256 Integrity -->
+        <div class="audit-item">
+            <div class="audit-status-icon {{ 'pass' if audit['sha256_integrity_match'] else 'fail' }}">
+                {{ '✓' if audit['sha256_integrity_match'] else '✕' }}
+            </div>
+            <div class="audit-content" style="flex: 1;">
+                <h4>4. SHA-256 Plaintext Hash Integrity Comparison</h4>
+                <p>
+                    Computed cryptographic digest over recovered plaintext bytes and compared bit-for-bit with sender's certified hash.
+                </p>
+                
+                <div class="hash-comparison-box">
+                    <div style="color: var(--text-muted); margin-bottom: 4px;">Original Plaintext SHA-256 Hash:</div>
+                    <div style="color: var(--accent-cyan);">{{ audit['original_hash'] }}</div>
+                    
+                    <div style="color: var(--text-muted); margin-top: 8px; margin-bottom: 4px;">Recomputed Decrypted SHA-256 Hash:</div>
+                    <div style="color: {{ 'var(--accent-emerald)' if audit['sha256_integrity_match'] else 'var(--accent-rose)' }};">
+                        {{ audit['recomputed_hash'] or 'Decryption not completed' }}
+                    </div>
+                </div>
+            </div>
+            <span class="badge {{ 'badge-success' if audit['sha256_integrity_match'] else 'badge-danger' }}">
+                {{ 'MATCH 100%' if audit['sha256_integrity_match'] else 'MISMATCH' }}
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Cryptographic Parameters Inspector -->
+<div class="glass-card">
+    <h3 class="card-title">
+        <span>🔍</span> Package Cryptographic Metadata Inspector
+    </h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; font-size: 0.82rem;">
+        <div style="background: rgba(15, 23, 42, 0.6); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            <div style="color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">Unique GCM Nonce (12 Bytes)</div>
+            <div class="mono-text">{{ audit['nonce_hex'] }}</div>
+        </div>
+
+        <div style="background: rgba(15, 23, 42, 0.6); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            <div style="color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">Encrypted AES Key Snippet (256 Bytes)</div>
+            <div class="mono-text">{{ audit['encrypted_aes_key_hex'] }}</div>
+        </div>
+
+        <div style="background: rgba(15, 23, 42, 0.6); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); grid-column: 1 / -1;">
+            <div style="color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">Sender RSA-PSS Signature Snippet (256 Bytes)</div>
+            <div class="mono-text">{{ audit['signature_hex'] }}</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

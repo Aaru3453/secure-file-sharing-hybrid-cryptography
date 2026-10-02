@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+instance/
+.pytest_cache/
+storage/encrypted/*
+!storage/encrypted/.gitkeep
+storage/keys/*
+!storage/keys/.gitkeep
+models/*.db
+*.log
+.env

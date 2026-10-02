@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Secure File Sharing System | Hybrid Cryptography{% endblock %}</title>
+    <meta name="description" content="College level CNS mini-project implementing Hybrid Cryptography with AES-256-GCM, RSA-2048 OAEP, SHA-256 integrity, and RSA-PSS digital signatures.">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Top Security Technologies Ribbon -->
+    <div class="security-ribbon">
+        <span>Applied Cryptography Engine:</span>
+        <span class="pill">AES-256-GCM</span>
+        <span class="pill">RSA-2048 OAEP</span>
+        <span class="pill">SHA-256 Digest</span>
+        <span class="pill">RSA-PSS Signatures</span>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <header class="main-navbar">
+        <div class="navbar-container">
+            <a href="{{ url_for('index') }}" class="brand-logo">
+                <div class="brand-icon">🛡️</div>
+                <div class="brand-text">
+                    <h1>SecureShare Hybrid</h1>
+                    <p>Cryptography & Network Security Mini Project</p>
+                </div>
+            </a>
+
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="{{ url_for('index') }}" class="nav-link">Home</a></li>
+                    {% if current_user %}
+                        <li><a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a></li>
+                        <li><a href="{{ url_for('send_file_page') }}" class="nav-link btn-nav">📤 Send File</a></li>
+                        <li><a href="{{ url_for('sent_files_page') }}" class="nav-link">Sent Files</a></li>
+                        <li><a href="{{ url_for('received_files_page') }}" class="nav-link">Received Files</a></li>
+                        <li>
+                            <div class="user-badge">
+                                <div class="user-avatar">{{ current_user['username'][0].upper() }}</div>
+                                <span>{{ current_user['username'] }}</span>
+                            </div>
+                        </li>
+                        <li><a href="{{ url_for('logout') }}" class="nav-link" style="color: var(--accent-rose);">Logout</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('login') }}" class="nav-link">Login</a></li>
+                        <li><a href="{{ url_for('register') }}" class="nav-link btn-nav">Register</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Page Content Container -->
+    <main class="page-wrapper">
+        <!-- Flash Notifications -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="flash-alert {{ category }}">
+                            <span>
+                                {% if category == 'success' %}✅
+                                {% elif category == 'danger' %}⚠️
+                                {% elif category == 'warning' %}⚡
+                                {% else %}ℹ️{% endif %}
+                            </span>
+                            <div>{{ message }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="footer-container">
+            <p><strong>Secure File Sharing System Using Hybrid Cryptography</strong> — B.Tech CNS Mini Project</p>
+            <p style="margin-top: 4px; font-size: 0.78rem;">
+                Built with Python 3, Flask, SQLite, and Python <code>cryptography</code> library.
+                Protects Confidentiality, Integrity, Non-Repudiation & Authenticity.
+            </p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,10 @@
+=============================================================
+College CNS Mini Project Demo Document
+Project: Secure File Sharing System Using Hybrid Cryptography
+Confidentiality: AES-256-GCM
+Key Wrapping: RSA-2048 OAEP
+Integrity: SHA-256
+Non-Repudiation: RSA-PSS
+=============================================================
+This is a real confidential document successfully encrypted by Alice
+and decrypted by Bob with zero data loss or tampering!

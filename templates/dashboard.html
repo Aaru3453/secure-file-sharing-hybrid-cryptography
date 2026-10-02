@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | SecureShare Hybrid Cryptography{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+    <div>
+        <h1 class="page-title">Welcome, {{ user['username'] }} 👋</h1>
+        <p class="page-subtitle">Applied Cryptography & Security Operations Center</p>
+    </div>
+    <div style="display: flex; gap: 12px;">
+        <a href="{{ url_for('send_file_page') }}" class="btn btn-emerald">
+            📤 Send Encrypted File
+        </a>
+        <a href="{{ url_for('received_files_page') }}" class="btn btn-secondary">
+            📥 View Received Files
+        </a>
+    </div>
+</div>
+
+<!-- Cryptography Technology Banner -->
+<div class="tech-banner">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+        <div>
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 4px;">
+                🔐 Active Cryptographic Primitives
+            </h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                Hybrid cryptosystem parameters configured for this session
+            </p>
+        </div>
+        <span class="badge badge-success">CNS COMPLIANT: ACTIVE</span>
+    </div>
+
+    <div class="tech-pills-row">
+        <div class="tech-spec-pill">
+            <span class="label">Bulk Cipher</span>
+            <span class="value">AES-256-GCM (AEAD)</span>
+        </div>
+        <div class="tech-spec-pill">
+            <span class="label">Nonce Length</span>
+            <span class="value">96 Bits (12 Bytes)</span>
+        </div>
+        <div class="tech-spec-pill">
+            <span class="label">Asymmetric Scheme</span>
+            <span class="value">RSA-2048 OAEP (SHA-256)</span>
+        </div>
+        <div class="tech-spec-pill">
+            <span class="label">Integrity Hash</span>
+            <span class="value">SHA-256 (256-bit)</span>
+        </div>
+        <div class="tech-spec-pill">
+            <span class="label">Digital Signature</span>
+            <span class="value">RSA-PSS (Salt: 32B)</span>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon sent">📤</div>
+        <div class="stat-details">
+            <h3>{{ stats['sent_count'] }}</h3>
+            <p>Files Encrypted & Sent</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon received">📥</div>
+        <div class="stat-details">
+            <h3>{{ stats['received_count'] }}</h3>
+            <p>Encrypted Packages Received</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon key">🔑</div>
+        <div class="stat-details">
+            <h3 style="font-size: 1.2rem;">RSA-2048</h3>
+            <p>Active Public Key Ready</p>
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px;">
+    <!-- Public Key Management Card -->
+    <div class="glass-card">
+        <h3 class="card-title">
+            <span>🛡️</span> Your RSA Public Key Certificate
+        </h3>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 14px;">
+            Other users use this 2048-bit public key to encrypt AES symmetric keys intended for you.
+        </p>
+
+        <div style="margin-bottom: 14px;">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">
+                SHA-256 Key Fingerprint
+            </div>
+            <div class="mono-text" style="background: rgba(15, 23, 42, 0.7); padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); font-size: 0.78rem; word-break: break-all;">
+                {{ key_fingerprint }}
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="{{ url_for('download_public_key', username=user['username']) }}" class="btn btn-secondary btn-sm">
+                ⬇️ Download Public Key (.pem)
+            </a>
+            <button class="btn btn-secondary btn-sm copy-btn" data-copy="{{ user['public_key_pem'] }}">
+                📋 Copy PEM to Clipboard
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Operations & Recent Transfers -->
+    <div class="glass-card">
+        <h3 class="card-title">
+            <span>⚡</span> Quick Transfer Actions
+        </h3>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <a href="{{ url_for('send_file_page') }}" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: var(--radius-md); text-decoration: none; color: var(--text-primary); transition: all 0.2s ease;">
+                <div>
+                    <strong style="color: var(--accent-cyan);">Encrypt & Send New File</strong>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Select recipient, encrypt with AES-256 & sign</div>
+                </div>
+                <span>→</span>
+            </a>
+
+            <a href="{{ url_for('received_files_page') }}" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: var(--radius-md); text-decoration: none; color: var(--text-primary); transition: all 0.2s ease;">
+                <div>
+                    <strong style="color: var(--accent-emerald);">Verify Received Files</strong>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Check digital signatures, hashes, and decrypt</div>
+                </div>
+                <span>→</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Sent Files History | SecureShare Hybrid{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+    <div>
+        <h1 class="page-title">Outbound Encrypted Transfers</h1>
+        <p class="page-subtitle">Log of files encrypted with AES-256-GCM and transferred to recipients.</p>
+    </div>
+    <a href="{{ url_for('send_file_page') }}" class="btn btn-primary">
+        📤 Send Another File
+    </a>
+</div>
+
+<div class="glass-card">
+    {% if files %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Original File</th>
+                        <th>Recipient</th>
+                        <th>Payload Size</th>
+                        <th>SHA-256 Digest</th>
+                        <th>Encrypted At</th>
+                        <th>Transfer Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in files %}
+                        <tr>
+                            <td>
+                                <strong style="color: var(--text-primary);">{{ f['original_filename'] }}</strong>
+                            </td>
+                            <td>
+                                <span>👤 {{ f['receiver_username'] }}</span>
+                            </td>
+                            <td>
+                                <span class="badge badge-info">{{ (f['file_size'] / 1024) | round(2) }} KB</span>
+                            </td>
+                            <td>
+                                <span class="mono-text" title="{{ f['original_sha256'] }}">
+                                    {{ f['original_sha256'][:16] }}...{{ f['original_sha256'][-8:] }}
+                                </span>
+                            </td>
+                            <td style="font-size: 0.85rem;">
+                                {{ f['uploaded_at'] }}
+                            </td>
+                            <td>
+                                {% if f['status'] == 'verified' or f['status'] == 'downloaded' %}
+                                    <span class="badge badge-success">✓ {{ f['status'].capitalize() }}</span>
+                                {% else %}
+                                    <span class="badge badge-warning">Transferred</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 48px 24px;">
+            <div style="font-size: 3rem; margin-bottom: 12px;">📭</div>
+            <h3>No Files Sent Yet</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                You haven't encrypted or shared any files yet.
+            </p>
+            <a href="{{ url_for('send_file_page') }}" class="btn btn-primary">
+                Send Your First Encrypted File →
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

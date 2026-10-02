@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Register New User & Generate RSA Keys | SecureShare{% endblock %}
+
+{% block content %}
+<div style="max-width: 540px; margin: 20px auto;">
+    <div class="glass-card">
+        <div style="text-align: center; margin-bottom: 24px;">
+            <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin: 0 auto 12px;">
+                🔐
+            </div>
+            <h2 class="page-title" style="font-size: 1.6rem;">Create Secure Identity</h2>
+            <p class="page-subtitle">Generates a dedicated 2048-bit RSA key pair for your account.</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+            <div class="form-group">
+                <label class="form-label" for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-control" placeholder="e.g. Alice or Bob" required autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="email">College / University Email</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="student@college.edu" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Password (used to protect your RSA private key)</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Minimum 6 characters" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="confirm_password">Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Re-enter password" required>
+            </div>
+
+            <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 20px; font-size: 0.82rem; color: var(--text-secondary);">
+                <strong style="color: var(--accent-cyan);">Note:</strong> Upon registration, an <strong>RSA-2048</strong> key pair is created. The private key is encrypted with PBKDF2-HMAC-SHA256, and the public key is registered in the public directory for file sharing.
+            </div>
+
+            <button type="submit" id="registerSubmitBtn" class="btn btn-primary" style="width: 100%;">
+                Generate Keys & Register
+            </button>
+        </form>
+
+        <div id="registerKeygenNotice" style="display: none; align-items: center; justify-content: center; gap: 10px; margin-top: 16px; color: var(--accent-cyan); font-size: 0.88rem;">
+            <span>⏳ Performing prime number factorization check and generating 2048-bit RSA key...</span>
+        </div>
+
+        <div style="text-align: center; margin-top: 24px; font-size: 0.88rem; color: var(--text-secondary);">
+            Already have an account? <a href="{{ url_for('login') }}" style="color: var(--accent-cyan); text-decoration: none;">Login here</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

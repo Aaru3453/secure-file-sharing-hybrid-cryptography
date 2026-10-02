@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Hybrid Cryptography Secure File Sharing System | Home{% endblock %}
+
+{% block content %}
+<div class="page-header" style="text-align: center; max-width: 860px; margin: 20px auto 40px;">
+    <span class="badge badge-info" style="margin-bottom: 12px;">B.Tech CNS Mini Project</span>
+    <h1 style="font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px;">
+        Secure File Sharing System Using <span style="background: var(--gradient-cyber); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Hybrid Cryptography</span>
+    </h1>
+    <p class="page-subtitle" style="font-size: 1.1rem; line-height: 1.7;">
+        Combines the blistering computational speed of symmetric encryption (<strong>AES-256-GCM</strong>) 
+        with the robust key distribution of asymmetric cryptography (<strong>RSA-2048 OAEP</strong>), 
+        guaranteed by <strong>SHA-256</strong> integrity checks and <strong>RSA-PSS</strong> digital signatures.
+    </p>
+
+    <div style="margin-top: 28px; display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
+        {% if current_user %}
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary" style="padding: 12px 28px; font-size: 1rem;">
+                Go to Dashboard →
+            </a>
+            <a href="{{ url_for('send_file_page') }}" class="btn btn-emerald" style="padding: 12px 28px; font-size: 1rem;">
+                📤 Send Encrypted File
+            </a>
+        {% else %}
+            <a href="{{ url_for('register') }}" class="btn btn-primary" style="padding: 12px 28px; font-size: 1rem;">
+                Register New User & Generate Keys →
+            </a>
+            <a href="{{ url_for('login') }}" class="btn btn-secondary" style="padding: 12px 28px; font-size: 1rem;">
+                Login to Portal
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Cryptographic Building Blocks Cards -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 48px;">
+    <div class="glass-card">
+        <div style="font-size: 2rem; margin-bottom: 12px;">🔒</div>
+        <h3 style="font-size: 1.2rem; color: var(--accent-cyan); margin-bottom: 8px;">1. AES-256-GCM</h3>
+        <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6;">
+            <strong>Galois/Counter Mode (GCM):</strong> Encrypts the raw file payload. Generates a fresh random 256-bit symmetric key and a unique 96-bit nonce for every file, yielding high throughput and a 128-bit authentication tag.
+        </p>
+    </div>
+
+    <div class="glass-card">
+        <div style="font-size: 2rem; margin-bottom: 12px;">🔑</div>
+        <h3 style="font-size: 1.2rem; color: var(--accent-indigo); margin-bottom: 8px;">2. RSA-2048 OAEP</h3>
+        <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6;">
+            <strong>Optimal Asymmetric Encryption Padding:</strong> Encapsulates the 256-bit AES key using the recipient's RSA public key. Only the intended receiver can decrypt the AES key with their private key.
+        </p>
+    </div>
+
+    <div class="glass-card">
+        <div style="font-size: 2rem; margin-bottom: 12px;">#️⃣</div>
+        <h3 style="font-size: 1.2rem; color: var(--accent-emerald); margin-bottom: 8px;">3. SHA-256 Digest</h3>
+        <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6;">
+            <strong>Cryptographic Hash:</strong> Calculates a deterministic 256-bit hash over the plaintext file prior to encryption. Recomputed post-decryption to guarantee 100% bit-level data integrity.
+        </p>
+    </div>
+
+    <div class="glass-card">
+        <div style="font-size: 2rem; margin-bottom: 12px;">✍️</div>
+        <h3 style="font-size: 1.2rem; color: var(--accent-amber); margin-bottom: 8px;">4. RSA-PSS Signature</h3>
+        <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6;">
+            <strong>Probabilistic Signature Scheme:</strong> Sender signs the file hash and transfer metadata using their RSA private key. Guarantees message authenticity and legal non-repudiation.
+        </p>
+    </div>
+</div>
+
+<!-- Workflow Section -->
+<div class="glass-card" style="margin-bottom: 40px;">
+    <h2 class="card-title" style="font-size: 1.4rem; justify-content: center; margin-bottom: 24px;">
+        ⚙️ End-to-End Hybrid Transmission Pipeline
+    </h2>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+        <!-- Sender Workflow -->
+        <div style="background: rgba(10, 15, 29, 0.7); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                <span class="badge badge-info">Sender Workflow</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">(e.g., Alice)</span>
+            </div>
+            <ol style="padding-left: 20px; font-size: 0.88rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 10px;">
+                <li>Select recipient and upload file.</li>
+                <li>Compute original file's <strong>SHA-256</strong> hash.</li>
+                <li>Generate fresh random <strong>AES-256</strong> key & <strong>96-bit Nonce</strong>.</li>
+                <li>Encrypt file data using <strong>AES-256-GCM</strong> (produces ciphertext + auth tag).</li>
+                <li>Encrypt AES key with recipient's <strong>RSA-2048</strong> public key using <strong>OAEP</strong>.</li>
+                <li>Create digital signature using sender's private key using <strong>RSA-PSS</strong>.</li>
+                <li>Store ciphertext in <code>storage/encrypted/</code> and metadata in SQLite.</li>
+            </ol>
+        </div>
+
+        <!-- Receiver Workflow -->
+        <div style="background: rgba(10, 15, 29, 0.7); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                <span class="badge badge-success">Receiver Workflow</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">(e.g., Bob)</span>
+            </div>
+            <ol style="padding-left: 20px; font-size: 0.88rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 10px;">
+                <li>Login and open <strong>Received Files</strong> dashboard.</li>
+                <li>Select encrypted file package to verify & decrypt.</li>
+                <li>Decrypt AES key with receiver's <strong>RSA-2048</strong> private key (OAEP).</li>
+                <li>Decrypt ciphertext using recovered AES key, Nonce & Tag (AES-256-GCM).</li>
+                <li>Verify sender's digital signature using sender's <strong>RSA Public Key</strong> (RSA-PSS).</li>
+                <li>Recompute <strong>SHA-256</strong> on decrypted data and compare against original digest.</li>
+                <li>If all checks pass, download the verified original plaintext file.</li>
+            </ol>
+        </div>
+    </div>
+</div>
+{% endblock %}

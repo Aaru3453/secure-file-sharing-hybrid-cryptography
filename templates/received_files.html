@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Received Encrypted Packages | SecureShare Hybrid{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Inbound Encrypted Packages</h1>
+    <p class="page-subtitle">Encrypted files awaiting RSA-2048 private key decapsulation and cryptographic verification.</p>
+</div>
+
+<div class="glass-card">
+    {% if files %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Encrypted File</th>
+                        <th>Sender</th>
+                        <th>Cipher Size</th>
+                        <th>Received At</th>
+                        <th>Integrity & Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in files %}
+                        <tr>
+                            <td>
+                                <strong style="color: var(--text-primary);">{{ f['original_filename'] }}</strong>
+                                <div style="font-size: 0.72rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">
+                                    ID: {{ f['stored_filename'] }}
+                                </div>
+                            </td>
+                            <td>
+                                <span>👤 {{ f['sender_username'] }}</span>
+                            </td>
+                            <td>
+                                <span class="badge badge-info">{{ (f['file_size'] / 1024) | round(2) }} KB</span>
+                            </td>
+                            <td style="font-size: 0.85rem;">
+                                {{ f['uploaded_at'] }}
+                            </td>
+                            <td>
+                                {% if f['status'] == 'verified' %}
+                                    <span class="badge badge-success">✓ Verified</span>
+                                {% elif f['status'] == 'downloaded' %}
+                                    <span class="badge badge-success">✓ Downloaded</span>
+                                {% else %}
+                                    <span class="badge badge-warning">⚡ Ready to Verify</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('verify_and_decrypt_page', file_id=f['id']) }}" class="btn btn-primary btn-sm">
+                                    🔍 Verify & Decrypt
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 48px 24px;">
+            <div style="font-size: 3rem; margin-bottom: 12px;">📥</div>
+            <h3>No Received Files Found</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                When another user encrypts and transfers a file to you, it will appear here.
+            </p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
