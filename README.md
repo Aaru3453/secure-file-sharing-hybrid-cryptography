@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Secure File Sharing System Using Hybrid Cryptography
 
 A complete, production-grade **Cryptography and Network Security (CNS) Mini Project** built with Python 3, Flask, SQLite, and the Python `cryptography` library.
@@ -298,3 +299,6 @@ OK
 - Multi-party file sharing (encrypting symmetric key for multiple recipients using their respective public keys).
 - Certificate Authority (X.509 certificates) integration to prevent Public Key Infrastructure (PKI) spoofing.
 - Elliptic Curve Cryptography (ECC) support (e.g., ECDSA / X25519) for smaller key sizes and higher performance.
+=======
+# CollegeProject
+>>>>>>> 30d86213f303f5904b1d181aa7c8ecf63f1b6417
